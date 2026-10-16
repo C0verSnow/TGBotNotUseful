@@ -1,3 +1,5 @@
+import base64
+import json
 import os
 import unittest
 from unittest.mock import patch, Mock
@@ -78,6 +80,51 @@ class BotTests(unittest.TestCase):
     @patch('bot.supabase_client.database', return_value=Mock(status_code=409))
     def test_unique_claim(self, database):
         self.assertFalse(supabase_client.claim(123))
+
+    @patch.dict(os.environ, {'SUPABASE_KEY': 'sb_publishable_test', 'SUPABASE_URL': 'https://example.supabase.co/'})
+    @patch('bot.supabase_client.request')
+    def test_public_key_writes_and_duplicate_claim(self, request):
+        request.return_value = Mock(status_code=201)
+        self.assertTrue(supabase_client.claim(123))
+        self.assertEqual(request.call_args.args, ('POST', 'https://example.supabase.co/rest/v1/bot_updates'))
+        self.assertEqual(request.call_args.kwargs['headers'],
+                         {'apikey': 'sb_publishable_test', 'Prefer': 'return=minimal'})
+        self.assertEqual(request.call_args.kwargs['json'], {'update_id': 123})
+        request.return_value = Mock(status_code=409)
+        self.assertFalse(supabase_client.claim(123))
+        request.return_value = Mock(status_code=403)
+        with self.assertRaises(OperationError):
+            supabase_client.claim(124)
+
+    @patch.dict(os.environ, {'SUPABASE_KEY': 'sb_publishable_test', 'SUPABASE_URL': 'https://example.supabase.co',
+                            'SUPABASE_SECRET_ID': '7'})
+    @patch('bot.supabase_client.request')
+    def test_public_patch_returns_only_id(self, request):
+        request.return_value = Mock(status_code=200, json=lambda: [{'id': 7}])
+        supabase_client.update_secret({'API_KEY': 'x', 'API_SECRET': 'y'})
+        self.assertEqual(request.call_args.kwargs['headers'],
+                         {'apikey': 'sb_publishable_test', 'Prefer': 'return=representation'})
+        self.assertEqual(request.call_args.kwargs['params'], {'id': 'eq.7', 'select': 'id'})
+        request.return_value = Mock(status_code=403)
+        with self.assertRaises(OperationError):
+            supabase_client.update_secret({'API_KEY': 'x', 'API_SECRET': 'y'})
+
+    @patch.dict(os.environ, {'SUPABASE_URL': 'https://example.supabase.co'})
+    @patch('bot.supabase_client.request')
+    def test_legacy_anon_and_reject_private_keys(self, request):
+        def jwt(role):
+            payload = base64.urlsafe_b64encode(json.dumps({'role': role}).encode()).decode().rstrip('=')
+            return 'header.' + payload + '.signature'
+
+        with patch.dict(os.environ, {'SUPABASE_KEY': jwt('anon')}):
+            supabase_client.database('POST', 'bot_updates', representation=False, json={'update_id': 1})
+            self.assertEqual(request.call_args.kwargs['headers']['apikey'], jwt('anon'))
+            self.assertNotIn('Authorization', request.call_args.kwargs['headers'])
+        request.reset_mock()
+        for key in ('sb_secret_test', jwt('service_role'), 'not-a-key', 'x.invalid!.y', 'x.bnVsbA.y', ''):
+            with self.subTest(key=key), patch.dict(os.environ, {'SUPABASE_KEY': key}), self.assertRaises(OperationError):
+                supabase_client.database('POST', 'bot_updates', json={'update_id': 1})
+        request.assert_not_called()
 
     @patch.dict(os.environ, {'TELEGRAM_WEBHOOK_SECRET': 'test-secret'})
     @patch('api.webhook.handle')
