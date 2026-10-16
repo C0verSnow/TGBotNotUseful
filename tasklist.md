@@ -5,6 +5,8 @@
 - 完成 issue #1，提供可部署的 Telegram 管理机器人和中文教程。
 
 ## 做完：
+- 已提交 PR #4：https://github.com/C0verSnow/TGBot/pull/4 ，并按 issue 要求关闭 #3；PR 尚未合并。
+- GitHub 连接器没有创建 PR 和关闭 issue 的权限，已通过电脑上已有的 GitHub 登录完成并确认页面状态。
 - issue #3 的远端 Checks 已通过：Python 测试、Shell 语法和 PostgreSQL 列权限/RLS、指定行更新、重复编号拦截均通过。
 - issue #3 测试记录：https://github.com/C0verSnow/TGBot/actions/runs/38901436556
 - 已修改公钥请求头，兼容 publishable/anon，拒绝私钥；去重插入不再要求读取记录。
@@ -30,4 +32,4 @@
 - 尚未合并 PR、部署线上服务或操作真实容器。
 
 ## 在做：
-- 正在提交 issue #3 的 PR、关闭 issue；GitHub 连接器没有创建 PR 的权限，改用电脑已有登录。
+- 无；issue #3 的代码、文档、远端验证和 PR 已完成，等待审阅和部署。
