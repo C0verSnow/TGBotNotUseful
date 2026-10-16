@@ -1,17 +1,36 @@
+import base64
+import json
+
 from bot.config import required, OperationError
 from bot.http import request
 
 
-def database(method, table, **kwargs):
+def public_key():
     key = required("SUPABASE_KEY")
+    if key.startswith("sb_publishable_"):
+        return key
+    # Legacy anon keys are JWTs. Inspect the role only to reject wrong config;
+    # Supabase, not this decoding, verifies the JWT signature.
+    try:
+        _, payload, _ = key.split(".")
+        if json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4))).get("role") == "anon":
+            return key
+    except (ValueError, AttributeError, UnicodeDecodeError):
+        pass
+    raise OperationError("SUPABASE_KEY 必须是 publishable 或 anon 公钥，不能使用私钥。")
+
+
+def database(method, table, *, representation=True, **kwargs):
+    key = public_key()
+    # Publishable keys are not JWTs: send them as apikey, never as Bearer.
     return request(method, required("SUPABASE_URL").rstrip("/") + "/rest/v1/" + table,
-                   headers={"apikey": key, "Authorization": "Bearer " + key,
-                            "Prefer": "return=representation"}, **kwargs)
+                   headers={"apikey": key,
+                            "Prefer": "return=representation" if representation else "return=minimal"}, **kwargs)
 
 
 def claim(update_id):
     # A unique primary key makes concurrent/retried deliveries fail closed.
-    response = database("POST", "bot_updates", json={"update_id": update_id})
+    response = database("POST", "bot_updates", representation=False, json={"update_id": update_id})
     if response.status_code == 409:
         return False
     if response.status_code != 201:

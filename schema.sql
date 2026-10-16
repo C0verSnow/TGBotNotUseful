@@ -11,7 +11,23 @@ create table if not exists public.bot_updates (
   created_at timestamptz not null default now()
 );
 alter table public.bot_updates enable row level security;
--- No anonymous/authenticated policies. Only backend service_role accesses these tables.
-revoke all on public.secret, public.bot_updates from anon, authenticated;
-grant select, update on public.secret to service_role;
-grant select, insert on public.bot_updates to service_role;
+-- Public-key-only mode, explicitly requested in issue #3. Anyone with the
+-- project URL and public key can update secrets and claim update IDs directly.
+-- No anonymous reads of API_KEY/API_SECRET; PATCH returns only id.
+revoke all on public.secret, public.bot_updates from public, anon, authenticated;
+revoke select (id, "API_KEY", "API_SECRET"), update (id, "API_KEY", "API_SECRET")
+  on public.secret from public, anon, authenticated;
+revoke select (update_id, created_at), insert (update_id, created_at)
+  on public.bot_updates from public, anon, authenticated;
+grant usage on schema public to anon;
+grant select (id), update ("API_KEY", "API_SECRET") on public.secret to anon;
+grant insert (update_id) on public.bot_updates to anon;
+
+drop policy if exists bot_public_secret_select on public.secret;
+create policy bot_public_secret_select on public.secret for select to anon using (true);
+drop policy if exists bot_public_secret_update on public.secret;
+create policy bot_public_secret_update on public.secret for update to anon
+  using (true) with check (true);
+drop policy if exists bot_public_updates_insert on public.bot_updates;
+create policy bot_public_updates_insert on public.bot_updates for insert to anon
+  with check (true);

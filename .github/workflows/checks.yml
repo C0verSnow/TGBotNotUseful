@@ -3,6 +3,33 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  database-permissions:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: ci-only-password
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply schema twice and verify anonymous permissions
+        run: |
+          psql -v ON_ERROR_STOP=1 -c 'CREATE ROLE anon; CREATE ROLE authenticated;'
+          psql -v ON_ERROR_STOP=1 -f schema.sql
+          psql -v ON_ERROR_STOP=1 -f schema.sql
+          psql -v ON_ERROR_STOP=1 -f tests/database_permissions.sql
   tests:
     runs-on: ubuntu-latest
     steps:
