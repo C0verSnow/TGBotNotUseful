@@ -1,0 +1,70 @@
+name: Docker control
+run-name: Docker ${{ inputs.action }} · request ${{ inputs.request_id }}
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Existing container operation
+        type: choice
+        options: [start, stop]
+        required: true
+      chat_id:
+        description: Private Telegram chat ID
+        type: string
+        required: true
+      request_id:
+        description: Telegram update ID
+        type: string
+        required: true
+permissions:
+  contents: read
+jobs:
+  control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate fixed inputs
+        env:
+          ACTION: ${{ inputs.action }}
+          CHAT_ID: ${{ inputs.chat_id }}
+          REQUEST_ID: ${{ inputs.request_id }}
+        run: |
+          [[ "$ACTION" == start || "$ACTION" == stop ]]
+          [[ "$CHAT_ID" =~ ^[0-9]+$ && "$REQUEST_ID" =~ ^[0-9]+$ ]]
+      - name: Join Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+      - name: Run fixed Docker script over verified SSH
+        env:
+          ACTION: ${{ inputs.action }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
+          DOCKER_CONTAINER: ${{ vars.DOCKER_CONTAINER }}
+        run: bash scripts/deploy-ssh.sh "$ACTION"
+  notify:
+    needs: control
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install 'httpx>=0.28.1,<1'
+      - name: Report actual result
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          ACTION: ${{ inputs.action }}
+          CHAT_ID: ${{ inputs.chat_id }}
+          REQUEST_ID: ${{ inputs.request_id }}
+          RESULT: ${{ needs.control.result }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+        run: python scripts/notify.py
