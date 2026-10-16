@@ -4,15 +4,21 @@
 - 完成 issue #1，提供可部署的 Telegram 管理机器人和中文教程。
 
 ## 做完：
-- 2026-10-16：同步仓库，确认只有 README，在 feature 分支工作。
-- 确认数据库只更新指定主键，Docker 只启停已经存在的固定容器。
+- 2026-10-16：同步仓库，在 feature/issue-1-telegram-management 分支工作。
+- 完成 /id、白名单权限、私聊管理命令、密钥参数校验和原消息删除。
+- 完成 Supabase 指定主键更新，以及通过唯一消息编号防止重复执行。
+- 完成 Actions → Tailscale → 严格 SSH 主机验证 → 固定现有容器启停。
+- 完成独立的最终通知任务，区分提交成功和实际执行成功。
+- 补齐数据库 SQL、环境变量样例、Vercel 配置和中文使用文档。
+- GitHub 远端 Checks 通过：14 个测试通过，Shell 语法检查通过。
+- 测试记录：https://github.com/C0verSnow/TGBot/actions/runs/38857504821
+- 已提交 PR #2：https://github.com/C0verSnow/TGBot/pull/2
+- GitHub 连接器没有创建 PR 的权限，使用电脑上已有的 GitHub 登录成功创建。
 
 ## 没做：
-- 真实 Telegram、Supabase、Tailscale、SSH 联调需要部署账号和服务器配置。
-- 按仓库约定，不进行本地编译验证。
+- 真实 Telegram、Supabase、Tailscale、SSH 联调需要部署账号和服务器配置，尚未执行。
+- 按仓库约定，没有进行本地编译或本地测试，只做代码阅读和差异检查。
+- 尚未合并 PR、部署线上服务或操作真实容器。
 
 ## 在做：
-- 编写 Webhook、白名单、数据库更新、远程执行工作流和远端测试。
-- 已补齐命令处理、固定主键更新、持久化消息去重和失败时不泄露密钥的处理。
-- 已补齐 Tailscale OAuth、严格 SSH 主机验证、固定容器启停与独立最终通知。
-- 已编写中文部署教程、数据库 SQL、配置清单和远端测试工作流。
+- 无；代码和文档交付已完成，等待 PR 审阅与部署配置。
