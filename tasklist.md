@@ -5,6 +5,8 @@
 - 完成 issue #1，提供可部署的 Telegram 管理机器人和中文教程。
 
 ## 做完：
+- issue #3 的远端 Checks 已通过：Python 测试、Shell 语法和 PostgreSQL 列权限/RLS、指定行更新、重复编号拦截均通过。
+- issue #3 测试记录：https://github.com/C0verSnow/TGBot/actions/runs/38901436556
 - 已修改公钥请求头，兼容 publishable/anon，拒绝私钥；去重插入不再要求读取记录。
 - 已调整 SQL 的 anon 列权限和 RLS，并更新中文文档、环境变量样例。
 - 已补充请求头、错误处理、私钥拒绝测试，以及远端 PostgreSQL 权限与去重检查。
@@ -28,4 +30,4 @@
 - 尚未合并 PR、部署线上服务或操作真实容器。
 
 ## 在做：
-- 正在做差异检查，准备推送分支并等待远端 CI，然后提交 PR、关闭 issue #3。
+- 正在提交 issue #3 的 PR、关闭 issue；GitHub 连接器没有创建 PR 的权限，改用电脑已有登录。
