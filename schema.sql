@@ -31,3 +31,6 @@ create policy bot_public_secret_update on public.secret for update to anon
 drop policy if exists bot_public_updates_insert on public.bot_updates;
 create policy bot_public_updates_insert on public.bot_updates for insert to anon
   with check (true);
+
+-- Make newly created tables visible to the REST API after commit.
+notify pgrst, 'reload schema';

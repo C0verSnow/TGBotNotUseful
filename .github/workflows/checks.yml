@@ -29,6 +29,9 @@ jobs:
           psql -v ON_ERROR_STOP=1 -c 'CREATE ROLE anon; CREATE ROLE authenticated;'
           psql -v ON_ERROR_STOP=1 -f schema.sql
           psql -v ON_ERROR_STOP=1 -f schema.sql
+          psql -v ON_ERROR_STOP=1 -c 'DROP TABLE public.bot_updates;'
+          psql -v ON_ERROR_STOP=1 -f migrations/005_bot_updates.sql
+          psql -v ON_ERROR_STOP=1 -f migrations/005_bot_updates.sql
           psql -v ON_ERROR_STOP=1 -f tests/database_permissions.sql
   tests:
     runs-on: ubuntu-latest
