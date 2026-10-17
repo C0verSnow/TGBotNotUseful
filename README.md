@@ -13,3 +13,5 @@ Supabase 使用 `SUPABASE_KEY` 公钥（publishable 或 legacy anon），不使�
 Vercel 只提交 Docker 任务；Actions 的独立通知任务发送实际执行结果。所有请求设置超时，Telegram 更新编号通过 Supabase 唯一主键去重。SSH 脚本与容器操作脚本分开，参考 Orders3 的职责组织，但不拉镜像、不重建容器。
 
 测试由 `.github/workflows/checks.yml` 在 GitHub 运行，不在本地编译或运行测试。过程记录见 [tasklist.md](tasklist.md)。
+
+若 `/docker stop` 报消息去重失败，先核对数据库是否存在 `public.bot_updates`。已有项目可在 Supabase SQL Editor 执行 [去重修复迁移](migrations/005_bot_updates.sql)，具体原因、错误码和验收步骤见 [使用文档第 11 节](使用文档.md#11-docker-stop-提示去重记录失败issue-5)。

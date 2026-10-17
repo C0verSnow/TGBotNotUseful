@@ -77,7 +77,7 @@ class BotTests(unittest.TestCase):
         with self.assertRaises(OperationError):
             supabase_client.update_secret({'API_KEY': 'x', 'API_SECRET': 'y'})
 
-    @patch('bot.supabase_client.database', return_value=Mock(status_code=409))
+    @patch('bot.supabase_client.database', return_value=Mock(status_code=409, json=lambda: {'code': '23505'}))
     def test_unique_claim(self, database):
         self.assertFalse(supabase_client.claim(123))
 
@@ -90,7 +90,7 @@ class BotTests(unittest.TestCase):
         self.assertEqual(request.call_args.kwargs['headers'],
                          {'apikey': 'sb_publishable_test', 'Prefer': 'return=minimal'})
         self.assertEqual(request.call_args.kwargs['json'], {'update_id': 123})
-        request.return_value = Mock(status_code=409)
+        request.return_value = Mock(status_code=409, json=lambda: {'code': '23505'})
         self.assertFalse(supabase_client.claim(123))
         request.return_value = Mock(status_code=403)
         with self.assertRaises(OperationError):
