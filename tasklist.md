@@ -8,7 +8,10 @@
 ## 做完：
 - issue #5：真实 Supabase 去重 POST 返回 HTTP 404 / PGRST205，找不到 public.bot_updates，确认命令在提交 Docker 任务前失败。
 - 已补充只修复去重表的 SQL 迁移、缓存刷新、错误分类与脱敏日志；只将 409 + 23505 视为重复消息。
-- 已补充 Docker start/stop、密钥更新去重和异常回归测试，等待远端 Checks；未执行本地编译或测试。
+- 已补充 Docker start/stop、密钥更新去重和异常回归测试；远端 Checks 已通过（Python、Shell、PostgreSQL 权限和重复编号拦截）。未执行本地编译或测试。
+- issue #5 远端验证：https://github.com/C0verSnow/TGBot/actions/runs/38994767569
+- 已创建 PR #6：https://github.com/C0verSnow/TGBot/pull/6 。GitHub 连接器创建权限不足，已通过现有登录创建并确认。
+- 已核对浏览器中的 Supabase 项目与本地配置一致，管理页中没有 bot_updates 表。
 - 已提交 PR #4：https://github.com/C0verSnow/TGBot/pull/4 ，并按 issue 要求关闭 #3；PR 尚未合并。
 - GitHub 连接器没有创建 PR 和关闭 issue 的权限，已通过电脑上已有的 GitHub 登录完成并确认页面状态。
 - issue #3 的远端 Checks 已通过：Python 测试、Shell 语法和 PostgreSQL 列权限/RLS、指定行更新、重复编号拦截均通过。
@@ -36,5 +39,5 @@
 - 尚未合并 PR、部署线上服务或操作真实容器。
 
 ## 在做：
-- 2026-10-16：已同步 origin/main，建立 fix/issue-5-dedup 分支；检查真实数据库响应与去重流程，不做本地编译或本地测试。
+- issue #5：代码、文档、迁移脚本和远端测试已完成；线上迁移需创建表并允许公钥插入消息编号，等待用户确认后执行和验证，再关闭 issue。
 - 无；issue #3 的代码、文档、远端验证和 PR 已完成，等待审阅和部署。
