@@ -6,6 +6,7 @@
 - 完成 issue #1，提供可部署的 Telegram 管理机器人和中文教程。
 
 ## 做完：
+- 已创建白名单与验收文档 PR #7：https://github.com/C0verSnow/TGBot/pull/7 。推送检查已通过，包含 Python 测试、Shell 语法及数据库权限和去重检查：https://github.com/C0verSnow/TGBot/actions/runs/38999139303 。
 - Vercel 生产部署已确认 Ready，来源 main / 6585a75。通过电脑 Telegram 向用户指定的 @GatebyTroy_bot 发送真实 /docker stop，机器人回复“权限不足，User ID 不在白名单中”。当前 idlist.md 为空，因此没有执行容器操作，也未进入消息去重流程。
 - PR #6 已通过浏览器合并，main 合并提交为 6585a75；最新提交的 6 项远端检查全部通过。
 - 2026-10-16：用户确认后，通过浏览器执行 issue #5 完整数据库迁移，Supabase 显示成功。
@@ -40,9 +41,9 @@
 - GitHub 连接器没有创建 PR 的权限，使用电脑上已有的 GitHub 登录成功创建。
 
 ## 没做：
-- 真实 Telegram、Supabase、Tailscale、SSH 联调需要部署账号和服务器配置，尚未执行。
+- 真实 Telegram 已验证到白名单拦截，Supabase 迁移和去重已验证；Tailscale、SSH 和实际容器停止结果待白名单部署后检查。
 - 按仓库约定，没有进行本地编译或本地测试，只做代码阅读和差异检查。
-- 尚未合并 PR、部署线上服务或操作真实容器。
+- PR #6 已合并并部署；尚未完成真实容器停止验证。
 
 ## 在做：
 - 2026-10-16：用户已更新两个白名单 ID，并要求提交 PR、关闭 issue、跑通文档；建立 feature/issue-5-whitelist 分支，保留用户填写的两个 ID，补充文档中的白名单部署和权限不足排查步骤，接下来跑远端 CI 与真实停止命令。

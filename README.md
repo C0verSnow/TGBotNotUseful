@@ -8,7 +8,7 @@ Python Telegram 管理机器人，部署到 Vercel，通过 Webhook 接收命令
 
 Supabase 使用 `SUPABASE_KEY` 公钥（publishable 或 legacy anon），不使用 service_role 私钥。按需求开放匿名写入：拿到项目 URL 和公钥的人可以绕过机器人修改密钥、写入去重编号；密钥列不开放读取。升级时需要重新执行 `schema.sql` 并重新部署。
 
-完整部署步骤见 [使用文档](使用文档.md)。首次配置数据库运行 [schema.sql](schema.sql)，环境变量样例见 [.env.example](.env.example)。默认白名单为空。
+完整部署步骤见 [使用文档](使用文档.md)。首次配置数据库运行 [schema.sql](schema.sql)，环境变量样例见 [.env.example](.env.example)。管理白名单见 `idlist.md`，部署前请核对其中的账号；修改后须重新部署才能生效。
 
 Vercel 只提交 Docker 任务；Actions 的独立通知任务发送实际执行结果。所有请求设置超时，Telegram 更新编号通过 Supabase 唯一主键去重。SSH 脚本与容器操作脚本分开，参考 Orders3 的职责组织，但不拉镜像、不重建容器。
 
