@@ -14,4 +14,4 @@ Vercel 只提交 Docker 任务；Actions 的独立通知任务发送实际执行
 
 测试由 `.github/workflows/checks.yml` 在 GitHub 运行，不在本地编译或运行测试。过程记录见 [tasklist.md](tasklist.md)。
 
-若 `/docker stop` 报消息去重失败，先核对数据库是否存在 `public.bot_updates`。已有项目可在 Supabase SQL Editor 执行 [去重修复迁移](migrations/005_bot_updates.sql)，具体原因、错误码和验收步骤见 [使用文档第 11 节](使用文档.md#11-docker-stop-提示去重记录失败issue-5)。
+若 `/docker stop` 报消息去重失败，先核对数据库是否存在 `public.bot_updates`。已有项目可在 Supabase SQL Editor 执行 [去重修复迁移](migrations/005_bot_updates.sql)，具体原因、错误码和验收步骤见 [使用文档第 12 节](使用文档.md#12-docker-stop-提示去重记录失败issue-5)。

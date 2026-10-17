@@ -32,21 +32,34 @@ jobs:
         run: |
           [[ "$ACTION" == start || "$ACTION" == stop ]]
           [[ "$CHAT_ID" =~ ^[0-9]+$ && "$REQUEST_ID" =~ ^[0-9]+$ ]]
+      - name: Check Actions configuration
+        env:
+          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
+          AUTH_KEY: ${{ secrets.AUTH_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY || secrets.DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS || secrets.DEPLOY_KNOWN_HOSTS }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST || secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER || secrets.DEPLOY_USER }}
+          DOCKER_CONTAINER: ${{ vars.DOCKER_CONTAINER || secrets.DOCKER_CONTAINER }}
+        run: bash scripts/check-actions-config.sh
       - name: Join Tailscale
         uses: tailscale/github-action@v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          authkey: ${{ (secrets.TS_OAUTH_CLIENT_ID && secrets.TS_OAUTH_SECRET) && '' || secrets.AUTH_KEY }}
           tags: tag:ci
       - name: Run fixed Docker script over verified SSH
         env:
           ACTION: ${{ inputs.action }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
-          DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
-          DOCKER_CONTAINER: ${{ vars.DOCKER_CONTAINER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY || secrets.DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS || secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST || secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER || secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT || secrets.DEPLOY_PORT }}
+          DOCKER_CONTAINER: ${{ vars.DOCKER_CONTAINER || secrets.DOCKER_CONTAINER }}
         run: bash scripts/deploy-ssh.sh "$ACTION"
   notify:
     needs: control
@@ -66,5 +79,5 @@ jobs:
           CHAT_ID: ${{ inputs.chat_id }}
           REQUEST_ID: ${{ inputs.request_id }}
           RESULT: ${{ needs.control.result }}
-          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST || secrets.DEPLOY_HOST }}
         run: python scripts/notify.py
